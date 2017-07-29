@@ -1,0 +1,214 @@
+@font-face {
+  font-family: "icomoon";
+  src: url('fonts/icomoon.woff') format('woff'), url('fonts/icomoon.ttf') format('truetype'), url('fonts/icomoon.svg') format('svg');
+}
+
+.icon {
+  font-family: "icomoon";
+  font-size: 24px;
+  color: #757575;
+  font-style: normal;
+  -webkit-font-smoothing: antialiased;
+  text-rendering: optimizeLegibility;
+  /*-webkit-text-stroke-width: 0.2px;*/
+}
+
+.navbar .icon {
+  color: #FFF;
+}
+
+.icon-battery:before {
+  content: "\e900";
+}
+
+.icon-browser:before {
+  content: "\e901";
+}
+
+.icon-camera1:before {
+  content: "\e902";
+}
+
+.icon-record:before {
+  content: "\e903";
+}
+
+.icon-console:before {
+  content: "\e904";
+}
+
+.icon-contact:before {
+  content: "\e905";
+}
+
+.icon-device:before {
+  content: "\e906";
+}
+
+.icon-dialog:before {
+  content: "\e907";
+}
+
+.icon-file:before {
+  content: "\e908";
+}
+
+.icon-geo:before {
+  content: "\e909";
+}
+
+.icon-global:before {
+  content: "\e90a";
+}
+
+.icon-media:before {
+  content: "\e90b";
+}
+
+.icon-motion:before {
+  content: "\e90c";
+}
+
+.icon-network:before {
+  content: "\e90d";
+}
+
+.icon-orient:before {
+  content: "\e90e";
+}
+
+.icon-splash:before {
+  content: "\e90f";
+}
+
+.icon-transfer:before {
+  content: "\e910";
+}
+
+.icon-vibration:before {
+  content: "\e911";
+}
+
+.icon-whitelist:before {
+  content: "\e912";
+}
+
+.icon-statusbar:before {
+  content: "\e913";
+}
+
+@font-face {
+  font-family: 'Material Icons';
+  src: local('Material Icons'), local('MaterialIcons-Regular'), url('fonts/MaterialIcons-Regular.woff2') format('woff2'), url('fonts/MaterialIcons-Regular.woff') format('woff'), url('fonts/MaterialIcons-Regular.ttf') format('truetype'), url('fonts/MaterialIcons-Regular.svg') format('svg');
+}
+
+.material-icons {
+  font-family: 'Material Icons';
+  font-weight: normal;
+  font-style: normal;
+  font-size: 24px;
+  display: inline-block;
+  line-height: 1;
+  text-transform: none;
+  letter-spacing: normal;
+  word-wrap: normal;
+  white-space: nowrap;
+  -webkit-font-smoothing: antialiased;
+  text-rendering: optimizeLegibility;
+}
+
+blockquote {
+  color: #767573;
+  font-style: normal;
+  margin: 0 20px 0 25px;
+  padding-left: 10px;
+  position: relative;
+  text-shadow: #FFFFFF 0px 1px 0px;
+}
+
+blockquote::before {
+  font-style: normal;
+  content: '\201C';
+  font-size: 400%;
+  font-family: Georgia, Palatino, 'Times New Roman', Times;
+  position: absolute;
+  left: -20px;
+  top: -0.3em;
+  color: #cecece;
+}
+
+h4.help {
+  display: block;
+  font-size: 0.9em !important;
+  font-weight: normal;
+  background: #eef;
+  border-left: 6px solid #f62c0b;
+  padding: 5px 8px;
+  margin: .5em 0px;
+  border-left: 6px solid #188f69;
+}
+
+.camera-image {
+  border: 2px solid #666;
+  display: block;
+  visibility: hidden;
+  margin: 0.7em auto;
+  max-width: 80vw;
+  height: auto;
+}
+
+.deviceinfo {
+  border-collapse: collapse;
+  width: 95%;
+  margin: 0 auto;
+}
+
+.deviceinfo,
+th,
+td {
+  border: 1px solid #0c4982;
+}
+
+.deviceinfo th {
+  font-size: 1.15em;
+  padding-top: 4px;
+  padding-bottom: 4px;
+  background-color: #7ba3c9;
+  color: #f0f0f0;
+  text-shadow: none;
+  height: 1.3em;
+}
+
+.deviceinfo td,
+.deviceinfo th {
+  padding: 3px 7px 2px 7px;
+  vertical-align: bottom;
+  text-align: right;
+}
+
+
+
+.compass-ct {
+	position: relative;
+	margin: 0 auto;
+	width: 200px;
+	overflow: hidden;
+}
+
+.compass-ct .heading {
+	position: relative;
+	margin: 20px auto 20px auto;
+	text-align: center;
+}
+.compass {
+	padding-top: 12px;
+}
+.rose {
+	position: absolute;
+	top: 53px;
+	left: 40px;
+	width: 120px;
+  height: 121px;
+  -webkit-transition: all 100ms ease-in;
+  transition: all 100ms ease-in;
+}

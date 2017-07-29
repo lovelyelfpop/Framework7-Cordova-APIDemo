@@ -1,0 +1,90 @@
+<div data-page="contacts" class="page">
+    <!-- Top Navbar-->
+    <div class="navbar">
+        <div class="navbar-inner">
+            <div class="left">
+                <a href="#" class="link icon-only open-panel"><i class="icon icon-bars"></i></a>
+            </div>
+            <!-- We need cool sliding animation on title element, so we have additional "sliding" class -->
+            <div class="center">Contacts</div>
+            <div class="right"><a href="searchcontacts.html" class="link icon-only"><i class="icon material-icons">search</i></a></div>
+        </div>
+    </div>
+    <!-- Scrollable page content -->
+    <div class="page-content">
+        <div class="content-block">
+            <blockquote>This plugin defines a global navigator.contacts object, which provides access to the device contacts database.
+            </blockquote>
+        </div>
+        <form class="list-block inputs-list">
+            <ul>
+                <li>
+                    <div class="item-content">
+                        <div class="item-media"><i class="icon material-icons">person_outline</i></div>
+                        <div class="item-inner">
+                            <div class="item-title floating-label">Name</div>
+                            <div class="item-input">
+                                <input type="text" name="name" placeholder="" />
+                            </div>
+                        </div>
+                    </div>
+                </li>
+                <li>
+                    <div class="item-content">
+                        <div class="item-media"><i class="icon material-icons">call</i></div>
+                        <div class="item-inner">
+                            <div class="item-title floating-label">Phone</div>
+                            <div class="item-input">
+                                <input type="tel" name="phone" placeholder="" />
+                            </div>
+                        </div>
+                    </div>
+                </li>
+                <li>
+                    <div class="item-content">
+                        <div class="item-media"><i class="icon material-icons">today</i></div>
+                        <div class="item-inner">
+                            <div class="item-title floating-label">Birth day</div>
+                            <div class="item-input">
+                                <input type="date" name="birthday" placeholder="" />
+                            </div>
+                        </div>
+                    </div>
+                </li>
+                <li>
+                    <div class="item-content">
+                        <div class="item-media"><i class="icon material-icons">email</i></div>
+                        <div class="item-inner">
+                            <div class="item-title floating-label">E-mail</div>
+                            <div class="item-input">
+                                <input type="email" name="email" placeholder="" />
+                            </div>
+                        </div>
+                    </div>
+                </li>
+                <li class="align-top">
+                    <div class="item-content">
+                        <div class="item-media"><i class="icon material-icons">chat_bubble_outline</i></div>
+                        <div class="item-inner">
+                            <div class="item-title floating-label">Note</div>
+                            <div class="item-input">
+                                <textarea name="note" class="resizable"></textarea>
+                            </div>
+                        </div>
+                    </div>
+                </li>
+            </ul>
+        </form>
+
+        <div class="content-block">
+            <div class="content-block-inner">
+                <h4 class="help"><b>Save</b> to contacts.<br>
+                    <b>Pick</b> from contacts.</h4>
+                <p class="buttons-row">
+                    <a href="#" class="button button-fill button-raised btn-save">Save</a>
+                    <a href="#" class="button button-fill button-raised btn-pick">Pick</a>
+                </p>
+            </div>
+        </div>
+    </div>
+</div>

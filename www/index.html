@@ -1,0 +1,276 @@
+<!DOCTYPE html>
+<html>
+
+<head>
+    <!-- Required meta tags-->
+    <meta charset="utf-8">
+    <meta http-equiv="Content-Security-Policy" content="default-src 'self' data: gap: cdvfile: 'unsafe-eval' *; style-src 'self' 'unsafe-inline'; script-src 'self' 'unsafe-inline' 'unsafe-eval' *; connect-src 'self' ws: wss: *">
+    <meta name="viewport" content="width=device-width, initial-scale=1, maximum-scale=1, minimum-scale=1, user-scalable=no, minimal-ui">
+    <meta name="format-detection" content="telephone=no">
+    <meta name="mobile-web-app-capable" content="yes">
+    <meta name="apple-mobile-web-app-capable" content="yes">
+    <meta name="apple-mobile-web-app-status-bar-style" content="black">
+    <!-- Color theme for statusbar -->
+    <meta name="theme-color" content="#4CAF50">
+    <!-- Your app title -->
+    <title>My App</title>
+    <!-- Path to Framework7 material CSS theme styles-->
+    <link rel="stylesheet" href="css/framework7.material.css">
+    <!-- Path to Framework7 material related color styles -->
+    <link rel="stylesheet" href="css/framework7.material.colors.css">
+    <!-- Path to your custom app styles-->
+    <link rel="stylesheet" href="css/my-app.css">
+    <script type="text/javascript">
+        window.onerror = function (message, source, lineno, colno, error) {
+            alert(!error ? ('JS Error: ' + message) : error.stack);
+        }
+    </script>
+</head>
+
+<body>
+    <!-- Status bar overlay for full screen mode (PhoneGap) -->
+    <div class="statusbar-overlay"></div>
+    <!-- Panels overlay-->
+    <div class="panel-overlay"></div>
+    <!-- Left panel with reveal effect-->
+    <div class="panel panel-left panel-cover">
+        <div class="view navbar-fixed">
+            <div class="pages">
+                <div data-page="panel-left" class="page">
+                    <div class="navbar" style="height:80px">
+                        <div class="navbar-inner">
+                            <div class="center">
+                                <p>Plugin APIs</p>
+                            </div>
+                        </div>
+                    </div>
+                    <div class="page-content">
+                        <div class="list-block">
+                            <ul>
+                                <li>
+                                    <a href="battery.html" class="item-link close-panel">
+                                        <div class="item-content">
+                                            <div class="item-media"><i class="icon icon-battery"></i></div>
+                                            <div class="item-inner">
+                                                <div class="item-title">Battery Status</div>
+                                            </div>
+                                        </div>
+                                    </a>
+                                </li>
+                                <li>
+                                    <a href="camera.html" class="item-link close-panel">
+                                        <div class="item-content">
+                                            <div class="item-media"><i class="icon icon-camera1"></i></div>
+                                            <div class="item-inner">
+                                                <div class="item-title">Camera</div>
+                                            </div>
+                                        </div>
+                                    </a>
+                                </li>
+                                <li>
+                                    <a href="console.html" class="item-link close-panel">
+                                        <div class="item-content">
+                                            <div class="item-media"><i class="icon icon-console"></i></div>
+                                            <div class="item-inner">
+                                                <div class="item-title">Console</div>
+                                            </div>
+                                        </div>
+                                    </a>
+                                </li>
+                                <li>
+                                    <a href="contacts.html" class="item-link close-panel">
+                                        <div class="item-content">
+                                            <div class="item-media"><i class="icon icon-contact"></i></div>
+                                            <div class="item-inner">
+                                                <div class="item-title">Contacts</div>
+                                            </div>
+                                        </div>
+                                    </a>
+                                </li>
+                                <li>
+                                    <a href="device.html" class="item-link close-panel">
+                                        <div class="item-content">
+                                            <div class="item-media"><i class="icon icon-device"></i></div>
+                                            <div class="item-inner">
+                                                <div class="item-title">Device</div>
+                                            </div>
+                                        </div>
+                                    </a>
+                                </li>
+                                <li>
+                                    <a href="devicemotion.html" class="item-link close-panel">
+                                        <div class="item-content">
+                                            <div class="item-media"><i class="icon icon-motion"></i></div>
+                                            <div class="item-inner">
+                                                <div class="item-title">Device Motion</div>
+                                            </div>
+                                        </div>
+                                    </a>
+                                </li>
+                                <li>
+                                    <a href="deviceorientation.html" class="item-link close-panel">
+                                        <div class="item-content">
+                                            <div class="item-media"><i class="icon icon-orient"></i></div>
+                                            <div class="item-inner">
+                                                <div class="item-title">Device Orientation</div>
+                                            </div>
+                                        </div>
+                                    </a>
+                                </li>
+                                <li>
+                                    <a href="#" class="item-link close-panel">
+                                        <div class="item-content">
+                                            <div class="item-media"><i class="icon icon-dialog"></i></div>
+                                            <div class="item-inner">
+                                                <div class="item-title">Dialogs</div>
+                                            </div>
+                                        </div>
+                                    </a>
+                                </li>
+                                <li>
+                                    <a href="#" class="item-link close-panel">
+                                        <div class="item-content">
+                                            <div class="item-media"><i class="icon icon-file"></i></div>
+                                            <div class="item-inner">
+                                                <div class="item-title">File</div>
+                                            </div>
+                                        </div>
+                                    </a>
+                                </li>
+                                <li>
+                                    <a href="#" class="item-link close-panel">
+                                        <div class="item-content">
+                                            <div class="item-media"><i class="icon icon-transfer"></i></div>
+                                            <div class="item-inner">
+                                                <div class="item-title">File Transfer</div>
+                                            </div>
+                                        </div>
+                                    </a>
+                                </li>
+                                <li>
+                                    <a href="#" class="item-link close-panel">
+                                        <div class="item-content">
+                                            <div class="item-media"><i class="icon icon-geo"></i></div>
+                                            <div class="item-inner">
+                                                <div class="item-title">Geolocation</div>
+                                            </div>
+                                        </div>
+                                    </a>
+                                </li>
+                                <li>
+                                    <a href="#" class="item-link close-panel">
+                                        <div class="item-content">
+                                            <div class="item-media"><i class="icon icon-global"></i></div>
+                                            <div class="item-inner">
+                                                <div class="item-title">Globalization</div>
+                                            </div>
+                                        </div>
+                                    </a>
+                                </li>
+                                <li>
+                                    <a href="#" class="item-link close-panel">
+                                        <div class="item-content">
+                                            <div class="item-media"><i class="icon icon-browser"></i></div>
+                                            <div class="item-inner">
+                                                <div class="item-title">Inappbrowser</div>
+                                            </div>
+                                        </div>
+                                    </a>
+                                </li>
+                                <li>
+                                    <a href="#" class="item-link close-panel">
+                                        <div class="item-content">
+                                            <div class="item-media"><i class="icon icon-media"></i></div>
+                                            <div class="item-inner">
+                                                <div class="item-title">Media</div>
+                                            </div>
+                                        </div>
+                                    </a>
+                                </li>
+                                <li>
+                                    <a href="#" class="item-link close-panel">
+                                        <div class="item-content">
+                                            <div class="item-media"><i class="icon icon-record"></i></div>
+                                            <div class="item-inner">
+                                                <div class="item-title">Media Capture</div>
+                                            </div>
+                                        </div>
+                                    </a>
+                                </li>
+                                <li>
+                                    <a href="#" class="item-link close-panel">
+                                        <div class="item-content">
+                                            <div class="item-media"><i class="icon icon-network"></i></div>
+                                            <div class="item-inner">
+                                                <div class="item-title">Network Information</div>
+                                            </div>
+                                        </div>
+                                    </a>
+                                </li>
+                                <li>
+                                    <a href="#" class="item-link close-panel">
+                                        <div class="item-content">
+                                            <div class="item-media"><i class="icon icon-splash"></i></div>
+                                            <div class="item-inner">
+                                                <div class="item-title">Splashscreen</div>
+                                            </div>
+                                        </div>
+                                    </a>
+                                </li>
+                                <li>
+                                    <a href="#" class="item-link close-panel">
+                                        <div class="item-content">
+                                            <div class="item-media"><i class="icon icon-vibration"></i></div>
+                                            <div class="item-inner">
+                                                <div class="item-title">Vibration</div>
+                                            </div>
+                                        </div>
+                                    </a>
+                                </li>
+                                <li>
+                                    <a href="#" class="item-link close-panel">
+                                        <div class="item-content">
+                                            <div class="item-media"><i class="icon icon-statusbar"></i></div>
+                                            <div class="item-inner">
+                                                <div class="item-title">Statusbar</div>
+                                            </div>
+                                        </div>
+                                    </a>
+                                </li>
+                                <li>
+                                    <a href="#" class="item-link close-panel">
+                                        <div class="item-content">
+                                            <div class="item-media"><i class="icon icon-whitelist"></i></div>
+                                            <div class="item-inner">
+                                                <div class="item-title">Whitelist</div>
+                                            </div>
+                                        </div>
+                                    </a>
+                                </li>
+                            </ul>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+    <!-- Views -->
+    <div class="views">
+        <!-- Your main view, should have "view-main" class -->
+        <div class="view view-main">
+            <!-- Pages container, because we use fixed-through navbar and toolbar, it has additional appropriate classes-->
+            <div class="pages navbar-fixed">
+                <!-- Page, "data-page" contains page name -->
+
+            </div>
+
+        </div>
+    </div>
+    <script type="text/javascript" src="cordova.js"></script>
+    <!-- Path to Framework7 Library JS-->
+    <script type="text/javascript" src="js/framework7.js"></script>
+    <!-- Path to your app js-->
+    <script type="text/javascript" src="js/my-app.js"></script>
+</body>
+
+</html>
