@@ -189,26 +189,26 @@ td {
 
 
 .compass-ct {
+  max-width: 85vmin;
+  max-height: 85vmin;
 	position: relative;
 	margin: 0 auto;
-	width: 200px;
 	overflow: hidden;
 }
+.compass-ct img {
+  max-width: 100%;
+  max-height: 100%;
+}
 
-.compass-ct .heading {
+.compass-heading {
 	position: relative;
 	margin: 20px auto 20px auto;
 	text-align: center;
 }
-.compass {
-	padding-top: 12px;
-}
 .rose {
-	position: absolute;
-	top: 53px;
-	left: 40px;
-	width: 120px;
-  height: 121px;
-  -webkit-transition: all 100ms ease-in;
-  transition: all 100ms ease-in;
+  position: absolute;
+  top: 0;
+  left: 0;
+  /*-webkit-transition: all 80ms ease;
+  transition: all 80ms ease;*/
 }

@@ -466,7 +466,7 @@ myApp.onPageInit('deviceorientation', function (page) {
 
 myApp.onPageInit('compass', function (page) {
     var ct = $$(page.container),
-        headingDiv = ct.find('.heading'),
+        headingDiv = ct.find('.compass-heading'),
         rose = ct.find('.rose'),
         watchId;
     var convertToText = function (mh) {
@@ -494,21 +494,30 @@ myApp.onPageInit('compass', function (page) {
     };
 
     document.addEventListener("deviceready", function () {
-
+        var oldTimestamp = 0,
+            oldHeading = 0;
         watchId = navigator.compass.watchHeading(
             function (heading) {
-                headingDiv.html(
-                    'Heading: ' + round(heading.magneticHeading) + '&#xb0; ' + 
-                    convertToText(heading.magneticHeading) + '<br />' + 
-                    'True Heading: ' + round(heading.trueHeading) + '<br />' +
-                    'Accuracy: ' + round(heading.headingAccuracy)
-                );
+                if (heading.timestamp > oldTimestamp) {
+                    headingDiv.html(
+                        'Heading: ' + round(heading.magneticHeading) + '&#xb0; ' +
+                        convertToText(heading.magneticHeading) + '<br />' +
+                        'True Heading: ' + round(heading.trueHeading) + '<br />' +
+                        'Accuracy: ' + round(heading.headingAccuracy)
+                    );
+
+                    var transform = "rotate(-" + heading.magneticHeading + "deg)",
+                        duration = Math.max(Math.round((2000 * Math.abs(heading.magneticHeading - oldHeading)) / 360), 85);
                         
-                // Alter the CSS properties to rotate the rose image
-                rose.css({
-                    "-webkit-transform": "rotate(-" + heading.magneticHeading + "deg)",
-                    "transform": "rotate(-" + heading.magneticHeading + "deg)"
-                });	
+                    rose.css({
+                        "-webkit-transform": transform,
+                        "transform": transform,
+                        "-webkit-transition": "-webkit-transform " + duration + "ms ease-out",
+                        "transition": "transform " + duration + "ms ease-out"
+                    });
+                }
+                oldHeading = heading.magneticHeading;
+                oldTimestamp = heading.timestamp;
             },
             function (ex) {
                 myApp.alert("watchHeading Error: " + ex);
