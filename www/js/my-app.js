@@ -33,6 +33,7 @@ if (typeof window.PhoneGap != 'undefined' || typeof window.Cordova != 'undefined
     isCordova = true;
     document.addEventListener('deviceready', function () {
         loadInitialPage();
+        if (navigator.splashscreen) navigator.splashscreen.hide();
     }, false);
 } else {
     loadInitialPage();
@@ -40,15 +41,15 @@ if (typeof window.PhoneGap != 'undefined' || typeof window.Cordova != 'undefined
 
 // Callbacks to run specific code for specific pages, for example for About page:
 myApp.onPageInit('battery', function (page) {
-
+    var el = $$(page.container).find('.content-block-inner');
     var onBatteryStatus = function (status) {
-        $$(page.container).find('.content-block-inner').prepend('<div>' + "Level: " + status.level + " isPlugged: " + status.isPlugged + '</div>');
+        el.prepend('<div>' + "Level: " + status.level + " isPlugged: " + status.isPlugged + '</div>');
     }
     var onBatteryLow = function (status) {
-        $$(page.container).find('.content-block-inner').prepend('<div>' + "Battery Level Low " + status.level + "%" + '</div>');
+        el.prepend('<div>' + "Battery Level Low " + status.level + "%" + '</div>');
     }
     var onBatteryCritical = function (status) {
-        $$(page.container).find('.content-block-inner').prepend('<div>' + "Battery Level Critical " + status.level + "%\nRecharge Soon!" + '</div>');
+        el.prepend('<div>' + "Battery Level Critical " + status.level + "%\nRecharge Soon!" + '</div>');
     }
 
     window.addEventListener("batterystatus", onBatteryStatus, false);
@@ -494,30 +495,53 @@ myApp.onPageInit('compass', function (page) {
     };
 
     document.addEventListener("deviceready", function () {
-        var oldTimestamp = 0,
-            oldHeading = 0;
+        var oldHeading = 0,
+            oldRotate = 0;
         watchId = navigator.compass.watchHeading(
             function (heading) {
-                if (heading.timestamp > oldTimestamp) {
-                    headingDiv.html(
-                        'Heading: ' + round(heading.magneticHeading) + '&#xb0; ' +
-                        convertToText(heading.magneticHeading) + '<br />' +
-                        'True Heading: ' + round(heading.trueHeading) + '<br />' +
-                        'Accuracy: ' + round(heading.headingAccuracy)
-                    );
+                var magneticHeading = round(heading.magneticHeading);
+                headingDiv.html(
+                    'Heading: ' + magneticHeading + '&#xb0; ' +
+                    convertToText(magneticHeading) + '<br />' +
+                    'True Heading: ' + round(heading.trueHeading) + '<br />' +
+                    'Accuracy: ' + round(heading.headingAccuracy)
+                );
 
-                    var transform = "rotate(-" + heading.magneticHeading + "deg)",
-                        duration = Math.max(Math.round((2000 * Math.abs(heading.magneticHeading - oldHeading)) / 360), 85);
-                        
+                if(magneticHeading != oldHeading) {
+                    //calculate minimum rotation
+                    var newRotate,
+                        delta = magneticHeading - oldHeading,
+                        absDelta;
+                    if(Math.abs(delta) > 180) {
+                        absDelta = 360 - delta;
+                        if(delta > 0) {
+                            newRotate = oldRotate - absDelta;
+                        }
+                        else {
+                            newRotate = oldRotate + absDelta;
+                        }
+                    }
+                    else {
+                        absDelta = Math.abs(delta);
+                        if(delta > 0) {
+                            newRotate = oldRotate + absDelta;
+                        }
+                        else {
+                            newRotate = oldRotate - absDelta;
+                        }
+                    }
+                    var transform = "rotate(" + (-newRotate) + "deg)",
+                        duration = Math.max(Math.round((1500 * absDelta) / 360), 100);
+
                     rose.css({
                         "-webkit-transform": transform,
                         "transform": transform,
                         "-webkit-transition": "-webkit-transform " + duration + "ms ease-out",
                         "transition": "transform " + duration + "ms ease-out"
                     });
+                    oldHeading = magneticHeading;
+                    oldRotate = newRotate;
                 }
-                oldHeading = heading.magneticHeading;
-                oldTimestamp = heading.timestamp;
             },
             function (ex) {
                 myApp.alert("watchHeading Error: " + ex);
@@ -531,5 +555,189 @@ myApp.onPageInit('compass', function (page) {
             navigator.compass.clearWatch(watchId);
             watchId = null;
         }
+    });
+});
+
+
+
+
+myApp.onPageInit('globalization', function (page) {
+    var ct = $$(page.container);
+    document.addEventListener("deviceready", function () {
+        var g = navigator.globalization;
+        g.getPreferredLanguage(function (language) {
+            ct.find(".preferredlanguage").html(language.value);
+        }, function () {
+            ct.find(".preferredlanguage").html('Error!');
+        });
+
+        g.getLocaleName(function (locale) {
+            ct.find(".localename").html(locale.value);
+        }, function () {
+            ct.find(".localename").html('Error!');
+        });
+
+        g.getDatePattern(function (date) {
+            ct.find(".datepattern").html(date.pattern);
+        }, function () {
+            ct.find(".datepattern").html('Error!');
+        }, {
+            formatLength: 'full',
+            selector: 'date and time'
+        });
+
+        g.dateToString(new Date(), function (date) {
+            ct.find(".datetostring").html(date.value);
+        }, function () {
+            ct.find(".datetostring").html('Error!');
+        }, {
+            formatLength: 'full',
+            selector: 'date and time'
+        });
+
+        g.getDateNames(
+            function (names) {
+                var strArr = [];
+                for (var i = 0; i < names.value.length; i++) {
+                    strArr.push(names.value[i]);
+                }
+                ct.find(".monthnames").html(strArr.join(', '));
+            },
+            function () {
+                ct.find(".monthnames").html('Error!');
+            }, {
+                type: 'wide',
+                item: 'months'
+            }
+        );
+        g.getDateNames(
+            function (names) {
+                var strArr = [];
+                for (var i = 0; i < names.value.length; i++) {
+                    strArr.push(names.value[i]);
+                }
+                ct.find(".daynames").html(strArr.join(', '));
+            },
+            function () {
+                ct.find(".daynames").html('Error!');
+            }, {
+                type: 'wide',
+                item: 'days'
+            }
+        );
+
+        g.getFirstDayOfWeek(function (day) {
+            ct.find(".firstdayofweek").html(day.value);
+        }, function () {
+            ct.find(".firstdayofweek").html('Error!');
+        });
+
+        g.getNumberPattern(function (pattern) {
+            ct.find(".numberpattern").html('pattern: ' + pattern.pattern + '<br>' +
+                'symbol: ' + pattern.symbol + '<br>' +
+                'fraction: ' + pattern.fraction + '<br>' +
+                'rounding: ' + pattern.rounding + '<br>' +
+                'positive: ' + pattern.positive + '<br>' +
+                'negative: ' + pattern.negative + '<br>' +
+                'decimal: ' + pattern.decimal + '<br>' +
+                'grouping: ' + pattern.grouping);
+        }, function () {
+            ct.find(".numberpattern").html('Error!');
+        }, {
+            type: 'decimal'
+        });
+
+        g.getCurrencyPattern('USD', function (pattern) {
+            ct.find(".currencypattern").html('pattern: ' + pattern.pattern + '<br>' +
+                'code: ' + pattern.code + '<br>' +
+                'fraction: ' + pattern.fraction + '<br>' +
+                'rounding: ' + pattern.rounding + '<br>' +
+                'decimal: ' + pattern.decimal + '<br>' +
+                'grouping: ' + pattern.grouping);
+        }, function () {
+            ct.find(".currencypattern").html('Error!');
+        });
+
+        g.numberToString(
+            31415926535.89793,
+            function (number) {
+                ct.find(".numbertostring").html(number.value);
+            },
+            function () {
+                ct.find(".numbertostring").html('Error!');
+            }, {
+                type: 'decimal'
+            });
+
+    }, false);
+
+
+});
+
+
+
+myApp.onPageInit('dialogs', function (page) {
+    var ct = $$(page.container);
+    ct.find('.button-alert').on('click', function (e) {
+        navigator.notification.alert(
+            'You are the winner!', // message
+            function () {}, // callback
+            'Game Over', // title
+            'Done' // buttonName
+        );
+    });
+
+    ct.find('.button-confirm').on('click', function (e) {
+        navigator.notification.confirm(
+            'You are the winner!', // message
+            function (buttonIndex) { // callback to invoke with index of button pressed
+                myApp.addNotification({
+                    message: 'You selected button ' + buttonIndex
+                });
+            },
+            'Game Over', // title
+            ['Restart', 'Exit'] // buttonLabels
+        );
+    });
+
+    ct.find('.button-prompt').on('click', function (e) {
+        navigator.notification.prompt(
+            'Please enter your name', // message
+            function (results) {
+                myApp.addNotification({ // callback to invoke
+                    message: "You selected button number " + results.buttonIndex + " and entered " + results.input1
+                });
+            },
+            'Registration', // title
+            ['Ok', 'Exit'], // buttonLabels
+            'Jane Doe' // defaultText
+        );
+    });
+
+    ct.find('.button-beep').on('click', function (e) {
+        // Beep twice!
+        navigator.notification.beep(2);
+    });
+});
+
+
+myApp.onPageInit('statusbar', function (page) {
+    var ct = $$(page.container);
+    ct.find('.button[data-color]').on('click', function (e) {
+        var color = $$(e.target).attr('data-color');
+        if(color) {
+            StatusBar.backgroundColorByHexString(color);
+        }
+    });
+    ct.find('.btn-show').on('click', function (e) {
+        StatusBar.show();
+    });
+    ct.find('.btn-hide').on('click', function (e) {
+        StatusBar.hide();
+    });
+
+    myApp.onPageBeforeRemove('statusbar', function (page) {
+        StatusBar.backgroundColorByHexString('#2196f3');
+        StatusBar.show();
     });
 });

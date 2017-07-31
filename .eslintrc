@@ -8,7 +8,8 @@
 		"Dom7": true,
 		"device": true,
 		"ContactFindOptions": true,
-		"ContactField": true
+		"ContactField": true,
+		"StatusBar": true
 	},
 	"parserOptions": {
 		"sourceType": "module"
