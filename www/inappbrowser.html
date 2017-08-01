@@ -1,0 +1,85 @@
+<div data-page="inappbrowser" class="page">
+    <!-- Top Navbar-->
+    <div class="navbar">
+        <div class="navbar-inner">
+            <div class="left">
+                <a href="#" class="link icon-only open-panel"><i class="icon icon-bars"></i></a>
+            </div>
+            <!-- We need cool sliding animation on title element, so we have additional "sliding" class -->
+            <div class="center">InAppBrowser</div>
+        </div>
+    </div>
+    <!-- Scrollable page content -->
+    <div class="page-content">
+        <div class="content-block">
+            <blockquote>You can show helpful articles, videos, and web resources inside of your app. Users can view web pages without
+                leaving your app.
+            </blockquote>
+            <form class="">
+                <div class="list-block inputs-list" style="margin-bottom: 0;">
+                    <ul>
+                        <li>
+                            <div class="item-content">
+                                <div class="item-inner">
+                                    <div class="item-title floating-label">URL</div>
+                                    <div class="item-input">
+                                        <input type="url" placeholder="" name="url" value="http://cordova.apache.org/" />
+                                    </div>
+                                </div>
+                            </div>
+                        </li>
+                        <li>
+                            <div class="item-content">
+                                <div class="item-inner">
+                                    <div class="item-title label">Show Location Bar</div>
+                                    <div class="item-input">
+                                        <label class="label-switch">
+                                                <input type="checkbox" name="location" value="yes"/>
+                                                <div class="checkbox"></div>
+                                            </label>
+                                    </div>
+                                </div>
+                            </div>
+                        </li>
+                    </ul>
+                </div>
+                <div class="content-block-title" style="padding-top: 0;">Open Mode</div>
+                <div class="list-block">
+                    <ul>
+                        <li>
+                            <label class="label-radio item-content">
+                                    <input type="radio" name="mode" value="_self"/>
+                                    <div class="item-media"><i class="icon icon-form-radio"></i></div>
+                                    <div class="item-inner">
+                                    <div class="item-title">Load in Cordova WebView</div>
+                                    </div>
+                                </label>
+                        </li>
+                        <li>
+                            <label class="label-radio item-content">
+                                    <input type="radio" name="mode" value="_blank" checked="checked"/>
+                                    <div class="item-media"><i class="icon icon-form-radio"></i></div>
+                                    <div class="item-inner">
+                                    <div class="item-title">Load in InAppBrowser</div>
+                                    </div>
+                                </label>
+                        </li>
+                        <li>
+                            <label class="label-radio item-content">
+                                    <input type="radio" name="mode" value="_system"/>
+                                    <div class="item-media"><i class="icon icon-form-radio"></i></div>
+                                    <div class="item-inner">
+                                    <div class="item-title">Load in System Browser</div>
+                                    </div>
+                                </label>
+                        </li>
+                    </ul>
+                </div>
+            </form>
+            <p class="buttons-row">
+                <a href="#" class="button button-fill button-raised">Open</a>
+            </p>
+        </div>
+    </div>
+</div>
+</div>

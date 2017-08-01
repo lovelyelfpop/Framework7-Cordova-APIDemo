@@ -5,7 +5,8 @@ var myApp = new Framework7({
     // Enable Material theme
     material: true,
     swipePanel: 'left',
-    notificationHold: 1500
+    notificationHold: 1500,
+    cache: false
 });
 
 // Export selectors engine
@@ -23,11 +24,6 @@ var loadInitialPage = function () {
     }
 };
 
-var round = function (num) {
-    var dec = 3,
-        result = Math.round(num * Math.pow(10, dec)) / Math.pow(10, dec);
-    return result;
-};
 var isCordova = false;
 if (typeof window.PhoneGap != 'undefined' || typeof window.Cordova != 'undefined' || typeof window.cordova != 'undefined') {
     isCordova = true;
@@ -38,6 +34,14 @@ if (typeof window.PhoneGap != 'undefined' || typeof window.Cordova != 'undefined
 } else {
     loadInitialPage();
 }
+
+
+//round a number
+var round = function (num, digit) {
+    if (digit === undefined) digit = 3;
+    var result = Math.round(num * Math.pow(10, digit)) / Math.pow(10, digit);
+    return result;
+};
 
 // Callbacks to run specific code for specific pages, for example for About page:
 myApp.onPageInit('battery', function (page) {
@@ -507,26 +511,23 @@ myApp.onPageInit('compass', function (page) {
                     'Accuracy: ' + round(heading.headingAccuracy)
                 );
 
-                if(magneticHeading != oldHeading) {
+                if (magneticHeading != oldHeading) {
                     //calculate minimum rotation
                     var newRotate,
                         delta = magneticHeading - oldHeading,
                         absDelta;
-                    if(Math.abs(delta) > 180) {
+                    if (Math.abs(delta) > 180) {
                         absDelta = 360 - delta;
-                        if(delta > 0) {
+                        if (delta > 0) {
                             newRotate = oldRotate - absDelta;
-                        }
-                        else {
+                        } else {
                             newRotate = oldRotate + absDelta;
                         }
-                    }
-                    else {
+                    } else {
                         absDelta = Math.abs(delta);
-                        if(delta > 0) {
+                        if (delta > 0) {
                             newRotate = oldRotate + absDelta;
-                        }
-                        else {
+                        } else {
                             newRotate = oldRotate - absDelta;
                         }
                     }
@@ -725,7 +726,7 @@ myApp.onPageInit('statusbar', function (page) {
     var ct = $$(page.container);
     ct.find('.button[data-color]').on('click', function (e) {
         var color = $$(e.target).attr('data-color');
-        if(color) {
+        if (color) {
             StatusBar.backgroundColorByHexString(color);
         }
     });
@@ -739,5 +740,454 @@ myApp.onPageInit('statusbar', function (page) {
     myApp.onPageBeforeRemove('statusbar', function (page) {
         StatusBar.backgroundColorByHexString('#2196f3');
         StatusBar.show();
+    });
+});
+
+
+myApp.onPageInit('geolocation', function (page) {
+    var ct = $$(page.container),
+        watchId = null;
+    var onSuccess = function (position) {
+
+        ct.find('.row').html('<div class="col-100">Latitude: ' + position.coords.latitude + '</div>' +
+            '<div class="col-100">Longitude: ' + position.coords.longitude + '</div>' +
+            '<div class="col-100">Altitude: ' + position.coords.altitude + '</div>' +
+            '<div class="col-100">Accuracy: ' + position.coords.accuracy + '</div>' +
+            '<div class="col-100">Altitude Accuracy: ' + position.coords.altitudeAccuracy + '</div>' +
+            '<div class="col-100">Heading: ' + position.coords.heading + '</div>' +
+            '<div class="col-100">Speed: ' + position.coords.speed + '</div>' +
+            '<div class="col-100">Timestamp: ' + position.timestamp + '</div>');
+
+        var googleMap = ct.find('.map.google'),
+            gMapWidth = parseInt(googleMap.css("width"), 10), // remove 'px' from width value
+            gMapHeight = parseInt(googleMap.css("height"), 10),
+            scale = (window.devicePixelRatio || 0) > 1 ? '2' : '1';
+
+        googleMap.css('visibility', 'visible')
+            .attr('src', "http://maps.googleapis.com/maps/api/staticmap?center=" +
+                position.coords.latitude + "," + position.coords.longitude +
+                "&zoom=15&size=" + gMapWidth + "x" + gMapHeight + "&maptype=roadmap&markers=color:green%7C" +
+                position.coords.latitude + "," + position.coords.longitude +
+                "&sensor=false&scale=" + scale);
+
+
+        var baiduMap = ct.find('.map.baidu'),
+            bMapWidth = parseInt(baiduMap.css("width"), 10), // remove 'px' from width value
+            bMapHeight = parseInt(baiduMap.css("height"), 10),
+            dpiType = (window.devicePixelRatio || 0) > 1 ? 'ph' : 'pl';
+
+        baiduMap.css('visibility', 'visible')
+            .attr('src', "http://api.map.baidu.com/staticimage/v2?ak=PPMMOv61cLvXx4EGINx28U3N&width=" + bMapWidth + "&height=" + bMapHeight +
+                "&center=" + position.coords.longitude + "," + position.coords.latitude +
+                "&zoom=15&markers=" + position.coords.longitude + "," + position.coords.latitude +
+                "&coordtype=wgs84ll&dpiType=" + dpiType + "&scale=" + scale);
+    };
+    var onError = function (error) {
+        myApp.alert('code: ' + error.code + '<br>' +
+            'message: ' + error.message);
+    };
+    var clearWatch = function () {
+        if (watchId !== null) {
+            navigator.geolocation.clearWatch(watchId);
+            watchId = null;
+            ct.find('.row').html('');
+            ct.find('.map').css('visibility', 'hidden');
+        }
+    };
+
+    ct.find('.btn-toggle').on('click', function () {
+        if (watchId) {
+            clearWatch();
+        } else {
+            watchId = navigator.geolocation.watchPosition(
+                onSuccess, onError, {
+                    frequency: 3000,
+                    enableHighAccuracy: true,
+                    maximumAge: 5000,
+                    timeout: 5000
+                });
+        }
+    });
+    ct.find('.btn-current').on('click', function () {
+        clearWatch();
+        navigator.geolocation.getCurrentPosition(
+            onSuccess, onError);
+    });
+});
+
+
+myApp.onPageInit('inappbrowser', function (page) {
+    var ct = $$(page.container),
+        form = ct.find('form');
+
+    ct.find('.button').on('click', function (e) {
+        var data = myApp.formToJSON(form),
+            url = data.url;
+        if (!url) {
+            myApp.alert('The url is empty');
+            return;
+        }
+
+        var mode = data.mode,
+            location;
+        if (data.location && data.location.length) {
+            location = data.location[0];
+        }
+        location = location || 'no';
+        mode = mode || '_blank';
+
+        cordova.InAppBrowser.open(url, mode, 'location=' + location);
+    });
+});
+
+
+myApp.onPageInit('media', function (page) {
+    //MediaError 
+    var CONSTANT = {
+        1: 'MEDIA_ERR_ABORTED',
+        2: 'MEDIA_ERR_NETWORK',
+        3: 'MEDIA_ERR_DECODE',
+        4: 'MEDIA_ERR_NONE_SUPPORTED'
+    };
+    //Play Audio
+    var ct = $$(page.container),
+        progressbar = ct.find('.progressbar'),
+        btnPlayPause = ct.find('.button-playpause'),
+        audioPosition = ct.find('.audioPosition'),
+        mediaDuration = ct.find('.mediaDuration'),
+        duration = -1,
+        audioMedia = null,
+        audioTimer = null,
+        is_paused = false;
+
+    var formatSeconds = function (seconds) {
+        var minutes = parseInt(seconds / 60).toString(),
+            secondsLeft = (seconds % 60).toString();
+        if (minutes.length < 2) minutes = '0' + minutes;
+        if (secondsLeft.length < 2) secondsLeft = '0' + secondsLeft;
+        return minutes + ':' + secondsLeft;
+    };
+
+    var setAudioPosition = function (position) {
+        mediaDuration.html(formatSeconds(Math.max(duration, 0)));
+        audioPosition.html(formatSeconds(Math.max(position, 0)));
+
+        if (position == 0) {
+            myApp.setProgressbar(progressbar, 0);
+        } else {
+            if (duration > 0) {
+                var p = round((position * 100) / duration, 2);
+                myApp.setProgressbar(progressbar, p);
+            } else {
+                myApp.setProgressbar(progressbar, 0);
+            }
+        }
+    };
+    var onSuccess = function onSuccess() {
+        setAudioPosition(duration);
+        clearInterval(audioTimer);
+        audioTimer = null;
+        audioMedia = null;
+        is_paused = false;
+        duration = -1;
+    };
+
+    var onError = function (error) {
+        myApp.addNotification({
+            message: 'code: ' + error.code + '<br>' +
+                'message: ' + (error.message || CONSTANT[error.code] || '')
+        });
+        clearInterval(audioTimer);
+        audioTimer = null;
+        audioMedia = null;
+        is_paused = false;
+        setAudioPosition(0);
+        btnPlayPause.html('Play');
+    };
+
+    var pauseAudio = function () {
+        if (is_paused) return;
+        if (audioMedia) {
+            is_paused = true;
+            audioMedia.pause();
+            btnPlayPause.html('Play');
+        }
+    };
+    var stopAudio = function stopAudio() {
+        if (audioMedia) {
+            audioMedia.stop();
+            audioMedia.release();
+            audioMedia = null;
+        }
+        if (audioTimer) {
+            clearInterval(audioTimer);
+            audioTimer = null;
+        }
+
+        is_paused = false;
+        duration = 0;
+        btnPlayPause.html('Play');
+        setAudioPosition(0);
+    };
+    var playAudio = function (src) {
+
+        if (audioMedia === null) {
+            mediaDuration.html("Loading...");
+            audioPosition.html(formatSeconds(0));
+            audioMedia = new Media(src, onSuccess, onError);
+            audioMedia.play();
+        } else {
+            if (is_paused) {
+                is_paused = false;
+                audioMedia.play();
+            }
+        }
+        btnPlayPause.html('Pause');
+
+        if (audioTimer === null) {
+            audioTimer = setInterval(function () {
+                audioMedia.getCurrentPosition(
+                    function (position) {
+                        if (position > -1) {
+                            if (duration <= 0) {
+                                duration = audioMedia.getDuration();
+                                if (duration > 0) {
+                                    duration = Math.round(duration);
+                                }
+                            }
+                            if (position >= duration)
+                                stopAudio();
+                            setAudioPosition(Math.round(position));
+                        }
+                    },
+                    function (error) {
+                        myApp.addNotification({
+                            message: "Error getting position: " + error
+                        });
+                    }
+                );
+            }, 500);
+        }
+    };
+
+    btnPlayPause.on('click', function (e) {
+        if (audioMedia && !is_paused) {
+            pauseAudio();
+        } else {
+            var src = 'audio/CFHour_Intro.mp3';
+            if (myApp.device.android) {
+                src = '/android_asset/www/' + src;
+            }
+            playAudio(src);
+        }
+    });
+    ct.find('.button-stop').on('click', function (e) {
+        stopAudio();
+    });
+
+    //Live Audio Recording
+    var is_recording = false,
+        audioRecording = null,
+        btnRecord = ct.find('.button-record'),
+        waveLoader = ct.find('.wave-loader'),
+        src = null;
+
+    var stopRecord = function () {
+        if (audioRecording) {
+            audioRecording.stopRecord();
+        }
+        audioRecording = null;
+        is_recording = false;
+        btnRecord.html('Start Record').addClass('disabled');
+        waveLoader.css('visibility', 'hidden');
+    };
+
+    var startRecord = function () {
+        src = "new_test_recording_" + Math.round(new Date().getTime() / 1000);
+        if (myApp.device.android) {
+            src = src + ".aac";
+        } else if (myApp.device.ios) {
+            src = src + ".m4a"; //or wav
+        }
+
+        audioRecording = new Media(src, function () {
+            //fired when recording is stopped and file is saved
+            myApp.addNotification({
+                message: 'Audio file successfully created:<br />' + src
+            });
+            btnRecord.removeClass('disabled');
+        }, function (err) {
+            myApp.addNotification({
+                message: 'code: ' + err.code + '<br>' +
+                    'message: ' + (err.message || CONSTANT[err.code] || '')
+            });
+            if (audioRecording) audioRecording.release();
+            btnRecord.removeClass('disabled');
+        });
+
+        audioRecording.startRecord();
+        is_recording = true;
+        btnRecord.html('Stop Record');
+        waveLoader.css('visibility', 'visible');
+    };
+    btnRecord.on('click', function () {
+        if (is_recording && audioRecording) { //stop record
+            stopRecord();
+        } else { //start record
+            startRecord();
+        }
+    });
+
+    myApp.onPageBeforeRemove('media', function (page) {
+        stopAudio();
+        stopRecord();
+    });
+});
+
+
+myApp.onPageInit('mediacapture', function (page) {
+    //CaptureError 
+    var CONSTANT = {
+        0: 'CAPTURE_INTERNAL_ERR',
+        1: 'CAPTURE_APPLICATION_BUSY',
+        2: 'CAPTURE_INVALID_ARGUMENT',
+        3: 'CAPTURE_NO_MEDIA_FILES',
+        4: 'CAPTURE_PERMISSION_DENIED',
+        5: 'CAPTURE_NOT_SUPPORTED'
+    };
+    var ct = $$(page.container),
+        log = ct.find('.log');
+    ct.find('.button-audio').on('click', function (e) {
+        navigator.device.capture.captureAudio(function (files) {
+            var i, output = '';
+            for (i = 0; i < files.length; i++) {
+                output += '<div>Name: ' + files[i].name + '<br />' +
+                    'Full Path: ' + files[i].fullPath + '<br />' +
+                    'Type: ' + files[i].type + '<br />' +
+                    'Created: ' + new Date(files[i].lastModifiedDate) + '<br />' +
+                    'Size: ' + files[i].size + '</div><br/>';
+            }
+            log.prepend(output);
+        }, function (err) {
+            console.log(JSON.stringify(err));
+            var msg = '';
+            if (typeof err === 'string') msg = err;
+            else if (err.code) msg = CONSTANT[err.code];
+            myApp.alert(msg);
+        }, {
+            limit: 2,
+            duration: 10
+        });
+    });
+    ct.find('.button-video').on('click', function (e) {
+        navigator.device.capture.captureVideo(function (files) {
+            var i, output = '';
+            for (i = 0; i < files.length; i++) {
+                output += '<div>Name: ' + files[i].name + '<br />' +
+                    'Full Path: ' + files[i].fullPath + '<br />' +
+                    'Type: ' + files[i].type + '<br />' +
+                    'Created: ' + new Date(files[i].lastModifiedDate) + '<br />' +
+                    'Size: ' + files[i].size + '</div><br/>';
+            }
+            log.prepend(output);
+        }, function (err) {
+            console.log(JSON.stringify(err));
+            var msg = '';
+            if (typeof err === 'string') msg = err;
+            else if (err.code) msg = CONSTANT[err.code];
+            myApp.alert(msg);
+        }, {
+            limit: 1
+        });
+    });
+    ct.find('.button-image').on('click', function (e) {
+        navigator.device.capture.captureImage(function (files) {
+            var i, output = '';
+            for (i = 0; i < files.length; i++) {
+                output += '<div>Name: ' + files[i].name + '<br />' +
+                    'Full Path: ' + files[i].fullPath + '<br />' +
+                    'Type: ' + files[i].type + '<br />' +
+                    'Created: ' + new Date(files[i].lastModifiedDate) + '<br />' +
+                    'Size: ' + files[i].size + '</div><br/>';
+            }
+            log.prepend(output);
+        }, function (err) {
+            console.log(JSON.stringify(err));
+            var msg = '';
+            if (typeof err === 'string') msg = err;
+            else if (err.code) msg = CONSTANT[err.code];
+            myApp.alert(msg);
+        }, {
+            limit: 2
+        });
+    });
+});
+
+
+myApp.onPageInit('networkinformation', function (page) {
+    var ct = $$(page.container),
+        log = ct.find('.log');
+
+
+    var logConnectionType = function () {
+        var networkState = navigator.connection.type;
+
+        var states = {};
+        states[Connection.UNKNOWN] = 'Unknown connection';
+        states[Connection.ETHERNET] = 'Ethernet connection';
+        states[Connection.WIFI] = 'WiFi connection';
+        states[Connection.CELL_2G] = 'Cell 2G connection';
+        states[Connection.CELL_3G] = 'Cell 3G connection';
+        states[Connection.CELL_4G] = 'Cell 4G connection';
+        states[Connection.CELL] = 'Cell generic connection';
+        states[Connection.NONE] = 'No network connection';
+
+        log.append('Your connection type is: ' + states[networkState]);
+    };
+
+    var onOnLine = function () {
+        log.html('You are online: ' + new Date().toLocaleString() + '<br>');
+        logConnectionType();
+    };
+    var onOffLine = function () {
+        log.html('You are offline: ' + new Date().toLocaleString() + '<br>');
+        logConnectionType();
+    };
+
+    document.addEventListener('deviceready', function () {
+        logConnectionType();
+        document.addEventListener("online", onOnLine, false);
+        document.addEventListener("offline", onOffLine, false);
+    }, false);
+
+    myApp.onPageBeforeRemove('networkinformation', function (page) {
+        document.removeEventListener("online", onOnLine, false);
+        document.removeEventListener("offline", onOffLine, false);
+    });
+});
+
+
+
+myApp.onPageInit('splashscreen', function (page) {
+    $$(page.container).find('.btn-show').on('click', function (e) {
+        if(navigator.splashscreen) {
+            navigator.splashscreen.show();
+            setTimeout(function(){
+                navigator.splashscreen.hide();
+            }, 3000);
+        }
+    });
+});
+
+myApp.onPageInit('vibrate', function (page) {
+    var ct = $$(page.container);
+    ct.find('.btn-vibrate1').on('click', function (e) {
+        navigator.vibrate(3000);
+    });
+    ct.find('.btn-vibrate2').on('click', function (e) {
+        navigator.vibrate([1000, 1000, 3000, 1000, 5000]);
+    });
+    ct.find('.btn-cancel').on('click', function (e) {
+        navigator.vibrate(0);
     });
 });

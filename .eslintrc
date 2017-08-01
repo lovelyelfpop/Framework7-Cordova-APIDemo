@@ -9,7 +9,10 @@
 		"device": true,
 		"ContactFindOptions": true,
 		"ContactField": true,
-		"StatusBar": true
+		"StatusBar": true,
+		"cordova": true,
+		"Media": true,
+		"Connection": true
 	},
 	"parserOptions": {
 		"sourceType": "module"
