@@ -42,16 +42,16 @@ var round = function (num, digit) {
     var result = Math.round(num * Math.pow(10, digit)) / Math.pow(10, digit);
     return result;
 };
-var prompt = function(title, message, defaultValue, callbackOk, callbackCancel) {
+var myPrompt = function(title, message, defaultValue, callbackOk, callbackCancel) {
     if(navigator.notification) {
-        navigator.notification.prompt(message || '', function(btn, value){
-            if(btn == 1) {
-                if(callbackOk) callbackOk(value);
+        navigator.notification.prompt(message || '', function(obj){
+            if(obj.buttonIndex == 2) {
+                if(callbackOk) callbackOk(obj.input1);
             }
             else {
-                if(callbackCancel) callbackCancel(value);
+                if(callbackCancel) callbackCancel(obj.input1);
             }
-        }, title || '', ['Cancel', 'Ok'], defaultValue || '');
+        }, title || '', ["Cancel", "OK"], defaultValue || '');
     }
     else {
         myApp.prompt('Please enter the name', 'New Folder', callbackOk, callbackCancel);
@@ -1295,7 +1295,7 @@ myApp.onPageInit('fileexplorer', function (page) {
                                 </li>\
                             {{else}}\
                                 {{#if isDirectory}}\
-                                    <li class="swipeout">\
+                                    <li class="swipeout" data-type="folder">\
                                         <a href="fileexplorer.html?dir={{js "encodeURIComponent(this.path)"}}" class="swipeout-content item-link item-content">\
                                             <div class="item-media"><i class="icon icon-folder"></i></div>\
                                             <div class="item-inner">\
@@ -1303,12 +1303,12 @@ myApp.onPageInit('fileexplorer', function (page) {
                                             </div>\
                                         </a>\
                                         <div class="swipeout-actions-right">\
-                                            <a href="#">Rename</a>\
-                                            <a href="#" class="swipeout-delete">Delete</a>\
+                                            <a href="#" class="action action-rename swipeout-close">Rename</a>\
+                                            <a href="#" class="action action-delete bg-red swipeout-close">Delete</a>\
                                         </div>\
                                     </li>\
                                 {{else}}\
-                                    <li class="swipeout">\
+                                    <li class="swipeout" data-type="file">\
                                         <div class="swipeout-content item-content">\
                                             <div class="item-media"><i class="icon icon-file"></i></div>\
                                             <div class="item-inner">\
@@ -1316,8 +1316,8 @@ myApp.onPageInit('fileexplorer', function (page) {
                                             </div>\
                                         </div>\
                                         <div class="swipeout-actions-right">\
-                                            <a href="#">Rename</a>\
-                                            <a href="#" class="swipeout-delete">Delete</a>\
+                                            <a href="#" class="action action-rename swipeout-close">Rename</a>\
+                                            <a href="#" class="action action-delete bg-red swipeout-close">Delete</a>\
                                         </div>\
                                     </li>\
                                 {{/if}}\
@@ -1367,14 +1367,39 @@ myApp.onPageInit('fileexplorer', function (page) {
         }
     }, false);
 
+    var scrollToDom = function(item){
+        var top = item.offset().top - navBar.height() + pageContent[0].scrollTop;
+        pageContent.scrollTop(Math.min(top, pageContent[0].scrollHeight), 600, function(){
+            //hightlight the file just created
+            item.addClass('highlight');
+            setTimeout(function(){
+                item.removeClass('highlight');
+            }, 600);
+        });
+    };
 
+    var scrollToEntry = function(type, name) {
+        var selector;
+        if(type == 'folder') {
+            selector = 'a.item-content .item-title';
+        }
+        else if(type == 'file') {
+            selector = 'div.item-content .item-title';
+        }
+        $$.each(listBlock.find(selector), function (i, d) {
+            if (d.innerHTML == name) {
+                var item = $$(d).parents('li');
+                scrollToDom(item);
+            }
+        });
+    };
 
     var createFolder = function () {
         speedDial.removeClass('speed-dial-opened');
 
         if (!currentDirEntry) return;
 
-        prompt('New Folder', 'Please enter the name', '', function (value) {
+        myPrompt('New Folder', 'Please enter the name', '', function (value) {
             //detect if folder already exists
             currentDirEntry.getDirectory(value, {
                 create: false
@@ -1389,19 +1414,7 @@ myApp.onPageInit('fileexplorer', function (page) {
                     }, function (entry) {
                         successDir(currentDirEntry, function () {
                             //scroll to the folder just created
-                            $$.each(listBlock.find('a.item-content .item-title'), function (i, d) {
-                                if (d.innerHTML == value) {
-                                    var item = $$(d).parents('li'),
-                                        top = item.offset().top - navBar.height() + pageContent[0].scrollTop;
-                                    pageContent.scrollTop(Math.min(top, pageContent[0].scrollHeight), 600, function(){
-                                        //hightlight the folder just created
-                                        item.addClass('highlight');
-                                        setTimeout(function(){
-                                            item.removeClass('highlight');
-                                        }, 600);
-                                    });
-                                }
-                            });
+                            scrollToEntry('folder', value);
                         });
                     }, fail);
 
@@ -1417,7 +1430,7 @@ myApp.onPageInit('fileexplorer', function (page) {
 
         if (!currentDirEntry) return;
         
-        prompt('New Text File', 'Please enter the name', '', function (value) {
+        myPrompt('New Text File', 'Please enter the name', '', function (value) {
             if(!/^.*\.txt$/i .test(value)) {
                 value += '.txt';
             }
@@ -1435,19 +1448,7 @@ myApp.onPageInit('fileexplorer', function (page) {
                     }, function (entry) {
                         successDir(currentDirEntry, function () {
                             //scroll to the file just created
-                            $$.each(listBlock.find('div.item-content .item-title'), function (i, d) {
-                                if (d.innerHTML == value) {
-                                    var item = $$(d).parents('li'),
-                                        top = item.offset().top - navBar.height() + pageContent[0].scrollTop;
-                                    pageContent.scrollTop(Math.min(top, pageContent[0].scrollHeight), 600, function(){
-                                        //hightlight the file just created
-                                        item.addClass('highlight');
-                                        setTimeout(function(){
-                                            item.removeClass('highlight');
-                                        }, 600);
-                                    });
-                                }
-                            });
+                            scrollToEntry('file', value);
                         });
                     }, fail);
 
@@ -1463,5 +1464,61 @@ myApp.onPageInit('fileexplorer', function (page) {
     });
     speedDial.find('.create-file').on('click', function(){
         createFile();
+    });
+
+    //swipe out action button click listeners
+    listBlock.on('click', 'a.action', function(e){
+        if(!currentDirEntry) return;
+
+        var t = $$(e.target),
+            li = t.parents('li'),        
+            type = li.attr('data-type'),
+            nameEl = li.find('.item-title'),
+            name = nameEl.html();
+        if(t.hasClass('action-rename')) {
+            myPrompt('Rename', 'Please enter a new name', name, function(value){
+                if(type == 'folder') {
+                    currentDirEntry.getDirectory(name, {
+                        create: false
+                    }, function (entry) {
+                        entry.moveTo(currentDirEntry, value, function(){
+                            nameEl.html(value);
+                        }, fail);
+                    }, fail);
+                }
+                else if(type == 'file') {
+                    currentDirEntry.getFile(name, {
+                        create: false
+                    }, function (entry) {
+                        entry.moveTo(currentDirEntry, value, function(){
+                            nameEl.html(value);
+                        }, fail);
+                    }, fail);
+                }
+            });
+        }
+        else if(t.hasClass('action-delete')) {
+            myApp.confirm('Are you sure you want to delete this ' + type + '?', 'Confirm', function(){
+                if(type == 'folder') {
+                    currentDirEntry.getDirectory(name, {
+                        create: false
+                    }, function (entry) {
+                        entry.removeRecursively(function(){
+                            myApp.swipeoutDelete(li);
+                        }, fail);
+                    }, fail);
+                }
+                else if(type == 'file') {
+                    currentDirEntry.getFile(name, {
+                        create: false
+                    }, function (entry) {
+                        entry.remove(function(){
+                            myApp.swipeoutDelete(li);
+                        }, fail);
+                    }, fail);
+                }
+            });
+        }
+
     });
 });
