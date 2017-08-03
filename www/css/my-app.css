@@ -49,7 +49,7 @@
   content: "\e907";
 }
 
-.icon-file:before {
+.icon-file-outline:before {
   content: "\e908";
 }
 
@@ -97,24 +97,48 @@
   content: "\e913";
 }
 
-@font-face {
-  font-family: 'Material Icons';
-  src: local('Material Icons'), local('MaterialIcons-Regular'), url('fonts/MaterialIcons-Regular.woff2') format('woff2'), url('fonts/MaterialIcons-Regular.woff') format('woff'), url('fonts/MaterialIcons-Regular.ttf') format('truetype'), url('fonts/MaterialIcons-Regular.svg') format('svg');
+.icon-call:before {
+  content: "\e914";
 }
 
-.material-icons {
-  font-family: 'Material Icons';
-  font-weight: normal;
-  font-style: normal;
-  font-size: 24px;
-  display: inline-block;
-  line-height: 1;
-  text-transform: none;
-  letter-spacing: normal;
-  word-wrap: normal;
-  white-space: nowrap;
-  -webkit-font-smoothing: antialiased;
-  text-rendering: optimizeLegibility;
+.icon-chat-outline:before {
+  content: "\e915";
+}
+
+.icon-email:before {
+  content: "\e916";
+}
+
+.icon-file:before {
+  content: "\e917";
+}
+
+.icon-newfile:before {
+  content: "\e918";
+}
+
+.icon-newfolder:before {
+  content: "\e919";
+}
+
+.icon-levelup:before {
+  content: "\e91a";
+}
+
+.icon-person-outline:before {
+  content: "\e91b";
+}
+
+.icon-search:before {
+  content: "\e91c";
+}
+
+.icon-today:before {
+  content: "\e91d";
+}
+
+.icon-folder:before {
+  content: "\e91e";
 }
 
 blockquote {
@@ -246,48 +270,56 @@ td {
   -webkit-animation-delay: 0.15s;
   animation-delay: 0.15s;
 }
+
 .Line_2 {
   -webkit-animation: pulse 1s infinite;
   animation: pulse 1s infinite;
   -webkit-animation-delay: 0.3s;
   animation-delay: 0.3s;
 }
+
 .Line_3 {
   -webkit-animation: pulse 1s infinite;
   animation: pulse 1s infinite;
   -webkit-animation-delay: 0.45s;
   animation-delay: 0.45s;
 }
+
 .Line_4 {
   -webkit-animation: pulse 1s infinite;
   animation: pulse 1s infinite;
   -webkit-animation-delay: 0.6s;
   animation-delay: 0.6s;
 }
+
 .Line_5 {
   -webkit-animation: pulse 1s infinite;
   animation: pulse 1s infinite;
   -webkit-animation-delay: 0.75s;
   animation-delay: 0.75s;
 }
+
 .Line_6 {
   -webkit-animation: pulse 1s infinite;
   animation: pulse 1s infinite;
   -webkit-animation-delay: 0.9s;
   animation-delay: 0.9s;
 }
+
 .Line_7 {
   -webkit-animation: pulse 1s infinite;
   animation: pulse 1s infinite;
   -webkit-animation-delay: 1.05s;
   animation-delay: 1.05s;
 }
+
 .Line_8 {
   -webkit-animation: pulse 1s infinite;
   animation: pulse 1s infinite;
   -webkit-animation-delay: 1.2s;
   animation-delay: 1.2s;
 }
+
 .Line_9 {
   -webkit-animation: pulse 1s infinite;
   animation: pulse 1s infinite;
@@ -335,4 +367,34 @@ td {
     -webkit-transform-origin: 50% 50%;
     transform-origin: 50% 50%;
   }
+}
+
+.speed-dial-buttons a {
+  overflow: visible;
+}
+
+.speed-dial-buttons a .icon {
+  color: #fff;
+}
+
+.speed-dial-buttons a .label-wrapper {
+  position: absolute;
+  right: calc(100% + .5rem);
+  top: calc(50% - .8rem);
+  width: 100vmin;
+}
+
+.speed-dial-buttons a .label {
+  position: absolute;
+  right: 0;
+  padding: 0 .3rem;
+  text-align: center;
+  background-color: #393A3F;
+  line-height: 1.6rem;
+  border-radius: .2rem;
+  box-shadow: 0 10px 20px rgba(0, 0, 0, .19), 0 6px 6px rgba(0, 0, 0, .23);
+}
+
+.list-block li.highlight {
+  background-color: rgba(33, 150, 243, .3);
 }

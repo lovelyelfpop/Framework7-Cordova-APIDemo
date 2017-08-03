@@ -27,6 +27,7 @@
     <allow-intent href="mqqwpa://*" />
     <platform name="android">
         <allow-intent href="market:*" />
+        <preference name="AndroidPersistentFileLocation" value="Compatibility" />
         <preference name="SplashScreen" value="screen" />
         <preference name="StatusBarBackgroundColor" value="#2196f3" />
         <icon density="ldpi" src="res/icon/android/icon-36-ldpi.png" />

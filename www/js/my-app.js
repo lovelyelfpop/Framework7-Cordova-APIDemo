@@ -42,6 +42,21 @@ var round = function (num, digit) {
     var result = Math.round(num * Math.pow(10, digit)) / Math.pow(10, digit);
     return result;
 };
+var prompt = function(title, message, defaultValue, callbackOk, callbackCancel) {
+    if(navigator.notification) {
+        navigator.notification.prompt(message || '', function(btn, value){
+            if(btn == 1) {
+                if(callbackOk) callbackOk(value);
+            }
+            else {
+                if(callbackCancel) callbackCancel(value);
+            }
+        }, title || '', ['Cancel', 'Ok'], defaultValue || '');
+    }
+    else {
+        myApp.prompt('Please enter the name', 'New Folder', callbackOk, callbackCancel);
+    }
+};
 
 // Callbacks to run specific code for specific pages, for example for About page:
 myApp.onPageInit('battery', function (page) {
@@ -1170,9 +1185,9 @@ myApp.onPageInit('networkinformation', function (page) {
 
 myApp.onPageInit('splashscreen', function (page) {
     $$(page.container).find('.btn-show').on('click', function (e) {
-        if(navigator.splashscreen) {
+        if (navigator.splashscreen) {
             navigator.splashscreen.show();
-            setTimeout(function(){
+            setTimeout(function () {
                 navigator.splashscreen.hide();
             }, 3000);
         }
@@ -1189,5 +1204,264 @@ myApp.onPageInit('vibrate', function (page) {
     });
     ct.find('.btn-cancel').on('click', function (e) {
         navigator.vibrate(0);
+    });
+});
+
+
+
+var fileSystem;
+//File and DIrectory List Template
+var fileExplorerTpl;
+//Constants
+var FILEERROR = {
+    1: 'NOT_FOUND_ERR',
+    2: 'SECURITY_ERR',
+    3: 'ABORT_ERR',
+    4: 'NOT_READABLE_ERR',
+    5: 'ENCODING_ERR',
+    6: 'NO_MODIFICATION_ALLOWED_ERR',
+    7: 'INVALID_STATE_ERR',
+    8: 'SYNTAX_ERR',
+    9: 'INVALID_MODIFICATION_ERR',
+    10: 'QUOTA_EXCEEDED_ERR',
+    11: 'TYPE_MISMATCH_ERR',
+    12: 'PATH_EXISTS_ERR'
+};
+myApp.onPageInit('fileexplorer', function (page) {
+    var ct = $$(page.container),
+        navBar = ct.find('.navbar'),
+        navTitle = navBar.find('.center'),
+        speedDial = ct.find('.speed-dial'),
+        pageContent = ct.find('.page-content'),
+        listBlock = pageContent.find('.list-block'),
+        query = page.query,
+        currentDirEntry;
+
+    console.log(query);
+
+    var fail = function (error) {
+        console.log(error);
+        myApp.addNotification({
+            message: "error: " + error.code + ', message: ' + FILEERROR[error.code]
+        });
+    };
+
+    var successDir = function (dirEntry, callback) {
+        var root = dirEntry.filesystem.root,
+            isRootDir = root.fullPath === dirEntry.fullPath;
+
+        if (!isRootDir) {
+            navTitle.html(dirEntry.name);
+        }
+
+        var dirReader = dirEntry.createReader();
+        dirReader.readEntries(function (entries) {
+            var arr = [];
+            for (var i = 0; i < entries.length; i++) {
+                arr.push({
+                    name: entries[i].name || '',
+                    isDirectory: entries[i].isDirectory ? 1 : 0,
+                    isFile: entries[i].isFile ? 1 : 0,
+                    entry: entries[i],
+                    path: entries[i].fullPath
+                });
+            }
+            arr.sort(function (a, b) {
+                var f1 = b.isDirectory - a.isDirectory;
+                if (f1 == 0) {
+                    return a.name.localeCompare(b.name);
+                }
+                return f1;
+            });
+
+            if (!isRootDir) { //非根目录
+                arr.unshift({
+                    name: '...',
+                    back: true
+                });
+            }
+            if (!fileExplorerTpl) {
+                fileExplorerTpl = Template7.compile('\
+                    <ul>\
+                        {{#each items}}\
+                            {{#if back}}\
+                                <li>\
+                                    <a href="#" class="back item-link item-content">\
+                                        <div class="item-media"><i class="icon icon-levelup"></i></div>\
+                                        <div class="item-inner">\
+                                            <div class="item-title">{{name}}</div>\
+                                        </div>\
+                                    </a>\
+                                </li>\
+                            {{else}}\
+                                {{#if isDirectory}}\
+                                    <li class="swipeout">\
+                                        <a href="fileexplorer.html?dir={{js "encodeURIComponent(this.path)"}}" class="swipeout-content item-link item-content">\
+                                            <div class="item-media"><i class="icon icon-folder"></i></div>\
+                                            <div class="item-inner">\
+                                                <div class="item-title">{{name}}</div>\
+                                            </div>\
+                                        </a>\
+                                        <div class="swipeout-actions-right">\
+                                            <a href="#">Rename</a>\
+                                            <a href="#" class="swipeout-delete">Delete</a>\
+                                        </div>\
+                                    </li>\
+                                {{else}}\
+                                    <li class="swipeout">\
+                                        <div class="swipeout-content item-content">\
+                                            <div class="item-media"><i class="icon icon-file"></i></div>\
+                                            <div class="item-inner">\
+                                                <div class="item-title">{{name}}</div>\
+                                            </div>\
+                                        </div>\
+                                        <div class="swipeout-actions-right">\
+                                            <a href="#">Rename</a>\
+                                            <a href="#" class="swipeout-delete">Delete</a>\
+                                        </div>\
+                                    </li>\
+                                {{/if}}\
+                            {{/if}}\
+                        {{/each}}\
+                    </ul>\
+                ');
+            }
+            var html = fileExplorerTpl({
+                items: arr
+            });
+            listBlock.html(html);
+            if (callback) {
+                callback();
+            }
+        }, fail);
+    };
+
+    var listEntriesOfDir = function (dir) {
+        console.log('list entries of directory: ' + dir);
+        if (dir) {
+            fileSystem.root.getDirectory(dir, {
+                create: false
+            }, function (dirEntry) {
+                currentDirEntry = dirEntry;
+                successDir(dirEntry);
+            }, fail);
+        } else {
+            currentDirEntry = fileSystem.root;
+            successDir(fileSystem.root);
+        }
+    };
+
+    document.addEventListener('deviceready', function () {
+        if (!fileSystem) {
+            window.requestFileSystem(
+                LocalFileSystem.PERSISTENT,
+                0,
+                function (fs) {
+                    fileSystem = fs;
+                    listEntriesOfDir(query.dir || '');
+                },
+                fail
+            );
+        } else {
+            listEntriesOfDir(query.dir || '');
+        }
+    }, false);
+
+
+
+    var createFolder = function () {
+        speedDial.removeClass('speed-dial-opened');
+
+        if (!currentDirEntry) return;
+
+        prompt('New Folder', 'Please enter the name', '', function (value) {
+            //detect if folder already exists
+            currentDirEntry.getDirectory(value, {
+                create: false
+            }, function (entry) {
+                myApp.alert('The folder named ' + value + ' already exists');
+            }, function (err) {
+                if (err.code == 1) { //not found
+                    //then create a new folder
+                    currentDirEntry.getDirectory(value, {
+                        create: true, 
+                        exclusive: false
+                    }, function (entry) {
+                        successDir(currentDirEntry, function () {
+                            //scroll to the folder just created
+                            $$.each(listBlock.find('a.item-content .item-title'), function (i, d) {
+                                if (d.innerHTML == value) {
+                                    var item = $$(d).parents('li'),
+                                        top = item.offset().top - navBar.height() + pageContent[0].scrollTop;
+                                    pageContent.scrollTop(Math.min(top, pageContent[0].scrollHeight), 600, function(){
+                                        //hightlight the folder just created
+                                        item.addClass('highlight');
+                                        setTimeout(function(){
+                                            item.removeClass('highlight');
+                                        }, 600);
+                                    });
+                                }
+                            });
+                        });
+                    }, fail);
+
+                } else {
+                    fail(err);
+                }
+            });
+        });
+    };
+
+    var createFile = function () {
+        speedDial.removeClass('speed-dial-opened');
+
+        if (!currentDirEntry) return;
+        
+        prompt('New Text File', 'Please enter the name', '', function (value) {
+            if(!/^.*\.txt$/i .test(value)) {
+                value += '.txt';
+            }
+            //detect if folder already exists
+            currentDirEntry.getFile(value, {
+                create: false
+            }, function (entry) {
+                myApp.alert('The file named ' + value + ' already exists');
+            }, function (err) {
+                if (err.code == 1) { //not found
+                    //then create a new file
+                    currentDirEntry.getFile(value, {
+                        create: true, 
+                        exclusive: false
+                    }, function (entry) {
+                        successDir(currentDirEntry, function () {
+                            //scroll to the file just created
+                            $$.each(listBlock.find('div.item-content .item-title'), function (i, d) {
+                                if (d.innerHTML == value) {
+                                    var item = $$(d).parents('li'),
+                                        top = item.offset().top - navBar.height() + pageContent[0].scrollTop;
+                                    pageContent.scrollTop(Math.min(top, pageContent[0].scrollHeight), 600, function(){
+                                        //hightlight the file just created
+                                        item.addClass('highlight');
+                                        setTimeout(function(){
+                                            item.removeClass('highlight');
+                                        }, 600);
+                                    });
+                                }
+                            });
+                        });
+                    }, fail);
+
+                } else {
+                    fail(err);
+                }
+            });
+        });
+    };
+
+    speedDial.find('.create-folder').on('click', function(){
+        createFolder();
+    });
+    speedDial.find('.create-file').on('click', function(){
+        createFile();
     });
 });

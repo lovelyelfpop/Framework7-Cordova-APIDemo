@@ -12,7 +12,9 @@
 		"StatusBar": true,
 		"cordova": true,
 		"Media": true,
-		"Connection": true
+		"Connection": true,
+		"LocalFileSystem": true,
+		"Template7": true
 	},
 	"parserOptions": {
 		"sourceType": "module"
