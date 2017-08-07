@@ -4,7 +4,7 @@ var myApp = new Framework7({
     modalTitle: 'Cordova API Demo',
     // Enable Material theme
     material: true,
-    swipePanel: 'left',
+    //swipePanel: 'left',
     notificationHold: 1500,
     cache: false
 });
@@ -42,18 +42,16 @@ var round = function (num, digit) {
     var result = Math.round(num * Math.pow(10, digit)) / Math.pow(10, digit);
     return result;
 };
-var myPrompt = function(title, message, defaultValue, callbackOk, callbackCancel) {
-    if(navigator.notification) {
-        navigator.notification.prompt(message || '', function(obj){
-            if(obj.buttonIndex == 2) {
-                if(callbackOk) callbackOk(obj.input1);
-            }
-            else {
-                if(callbackCancel) callbackCancel(obj.input1);
+var myPrompt = function (title, message, defaultValue, callbackOk, callbackCancel) {
+    if (navigator.notification) {
+        navigator.notification.prompt(message || '', function (obj) {
+            if (obj.buttonIndex == 2) {
+                if (callbackOk) callbackOk(obj.input1);
+            } else {
+                if (callbackCancel) callbackCancel(obj.input1);
             }
         }, title || '', ["Cancel", "OK"], defaultValue || '');
-    }
-    else {
+    } else {
         myApp.prompt('Please enter the name', 'New Folder', callbackOk, callbackCancel);
     }
 };
@@ -178,7 +176,7 @@ myApp.onPageInit('contacts', function (page) {
 
         contact.save(function (contact) {
             myApp.addNotification({
-                message: "Save Success"
+                message: "Successfully saved"
             });
         }, function (err) {
             myApp.alert("Save Failed: " + err);
@@ -1227,6 +1225,13 @@ var FILEERROR = {
     11: 'TYPE_MISMATCH_ERR',
     12: 'PATH_EXISTS_ERR'
 };
+
+var fileFailHandler = function (error) {
+    console.log(error);
+    myApp.addNotification({
+        message: "error: " + error.code + ', message: ' + FILEERROR[error.code]
+    });
+};
 myApp.onPageInit('fileexplorer', function (page) {
     var ct = $$(page.container),
         navBar = ct.find('.navbar'),
@@ -1238,13 +1243,6 @@ myApp.onPageInit('fileexplorer', function (page) {
         currentDirEntry;
 
     console.log(query);
-
-    var fail = function (error) {
-        console.log(error);
-        myApp.addNotification({
-            message: "error: " + error.code + ', message: ' + FILEERROR[error.code]
-        });
-    };
 
     var successDir = function (dirEntry, callback) {
         var root = dirEntry.filesystem.root,
@@ -1263,7 +1261,8 @@ myApp.onPageInit('fileexplorer', function (page) {
                     isDirectory: entries[i].isDirectory ? 1 : 0,
                     isFile: entries[i].isFile ? 1 : 0,
                     entry: entries[i],
-                    path: entries[i].fullPath
+                    path: entries[i].fullPath,
+                    url: entries[i].nativeURL
                 });
             }
             arr.sort(function (a, b) {
@@ -1309,7 +1308,7 @@ myApp.onPageInit('fileexplorer', function (page) {
                                     </li>\
                                 {{else}}\
                                     <li class="swipeout" data-type="file">\
-                                        <div class="swipeout-content item-content">\
+                                        <div data-url="{{url}}" class="swipeout-content item-content">\
                                             <div class="item-media"><i class="icon icon-file"></i></div>\
                                             <div class="item-inner">\
                                                 <div class="item-title">{{name}}</div>\
@@ -1333,7 +1332,7 @@ myApp.onPageInit('fileexplorer', function (page) {
             if (callback) {
                 callback();
             }
-        }, fail);
+        }, fileFailHandler);
     };
 
     var listEntriesOfDir = function (dir) {
@@ -1344,7 +1343,7 @@ myApp.onPageInit('fileexplorer', function (page) {
             }, function (dirEntry) {
                 currentDirEntry = dirEntry;
                 successDir(dirEntry);
-            }, fail);
+            }, fileFailHandler);
         } else {
             currentDirEntry = fileSystem.root;
             successDir(fileSystem.root);
@@ -1360,30 +1359,29 @@ myApp.onPageInit('fileexplorer', function (page) {
                     fileSystem = fs;
                     listEntriesOfDir(query.dir || '');
                 },
-                fail
+                fileFailHandler
             );
         } else {
             listEntriesOfDir(query.dir || '');
         }
     }, false);
 
-    var scrollToDom = function(item){
+    var scrollToDom = function (item) {
         var top = item.offset().top - navBar.height() + pageContent[0].scrollTop;
-        pageContent.scrollTop(Math.min(top, pageContent[0].scrollHeight), 600, function(){
+        pageContent.scrollTop(Math.min(top, pageContent[0].scrollHeight), 600, function () {
             //hightlight the file just created
             item.addClass('highlight');
-            setTimeout(function(){
+            setTimeout(function () {
                 item.removeClass('highlight');
             }, 600);
         });
     };
 
-    var scrollToEntry = function(type, name) {
+    var scrollToEntry = function (type, name) {
         var selector;
-        if(type == 'folder') {
+        if (type == 'folder') {
             selector = 'a.item-content .item-title';
-        }
-        else if(type == 'file') {
+        } else if (type == 'file') {
             selector = 'div.item-content .item-title';
         }
         $$.each(listBlock.find(selector), function (i, d) {
@@ -1409,17 +1407,17 @@ myApp.onPageInit('fileexplorer', function (page) {
                 if (err.code == 1) { //not found
                     //then create a new folder
                     currentDirEntry.getDirectory(value, {
-                        create: true, 
+                        create: true,
                         exclusive: false
                     }, function (entry) {
                         successDir(currentDirEntry, function () {
                             //scroll to the folder just created
                             scrollToEntry('folder', value);
                         });
-                    }, fail);
+                    }, fileFailHandler);
 
                 } else {
-                    fail(err);
+                    fileFailHandler(err);
                 }
             });
         });
@@ -1429,9 +1427,9 @@ myApp.onPageInit('fileexplorer', function (page) {
         speedDial.removeClass('speed-dial-opened');
 
         if (!currentDirEntry) return;
-        
+
         myPrompt('New Text File', 'Please enter the name', '', function (value) {
-            if(!/^.*\.txt$/i .test(value)) {
+            if (!/^.*\.txt$/i.test(value)) {
                 value += '.txt';
             }
             //detect if folder already exists
@@ -1443,82 +1441,407 @@ myApp.onPageInit('fileexplorer', function (page) {
                 if (err.code == 1) { //not found
                     //then create a new file
                     currentDirEntry.getFile(value, {
-                        create: true, 
+                        create: true,
                         exclusive: false
                     }, function (entry) {
                         successDir(currentDirEntry, function () {
                             //scroll to the file just created
                             scrollToEntry('file', value);
                         });
-                    }, fail);
+                    }, fileFailHandler);
 
                 } else {
-                    fail(err);
+                    fileFailHandler(err);
                 }
             });
         });
     };
 
-    speedDial.find('.create-folder').on('click', function(){
+    speedDial.find('.create-folder').on('click', function () {
         createFolder();
     });
-    speedDial.find('.create-file').on('click', function(){
+    speedDial.find('.create-file').on('click', function () {
         createFile();
     });
 
     //swipe out action button click listeners
-    listBlock.on('click', 'a.action', function(e){
-        if(!currentDirEntry) return;
+    listBlock.on('click', 'a.action', function (e) {
+        if (!currentDirEntry) return;
 
         var t = $$(e.target),
-            li = t.parents('li'),        
+            li = t.parents('li'),
             type = li.attr('data-type'),
             nameEl = li.find('.item-title'),
             name = nameEl.html();
-        if(t.hasClass('action-rename')) {
-            myPrompt('Rename', 'Please enter a new name', name, function(value){
-                if(type == 'folder') {
+        if (t.hasClass('action-rename')) {
+            myPrompt('Rename', 'Please enter a new name', name, function (value) {
+                if (type == 'folder') {
                     currentDirEntry.getDirectory(name, {
                         create: false
                     }, function (entry) {
-                        entry.moveTo(currentDirEntry, value, function(){
+                        entry.moveTo(currentDirEntry, value, function () {
                             nameEl.html(value);
-                        }, fail);
-                    }, fail);
-                }
-                else if(type == 'file') {
+                        }, fileFailHandler);
+                    }, fileFailHandler);
+                } else if (type == 'file') {
                     currentDirEntry.getFile(name, {
                         create: false
                     }, function (entry) {
-                        entry.moveTo(currentDirEntry, value, function(){
+                        entry.moveTo(currentDirEntry, value, function () {
                             nameEl.html(value);
-                        }, fail);
-                    }, fail);
+                        }, fileFailHandler);
+                    }, fileFailHandler);
                 }
             });
-        }
-        else if(t.hasClass('action-delete')) {
-            myApp.confirm('Are you sure you want to delete this ' + type + '?', 'Confirm', function(){
-                if(type == 'folder') {
+        } else if (t.hasClass('action-delete')) {
+            myApp.confirm('Are you sure you want to delete this ' + type + '?', 'Confirm', function () {
+                if (type == 'folder') {
                     currentDirEntry.getDirectory(name, {
                         create: false
                     }, function (entry) {
-                        entry.removeRecursively(function(){
+                        entry.removeRecursively(function () {
                             myApp.swipeoutDelete(li);
-                        }, fail);
-                    }, fail);
-                }
-                else if(type == 'file') {
+                        }, fileFailHandler);
+                    }, fileFailHandler);
+                } else if (type == 'file') {
                     currentDirEntry.getFile(name, {
                         create: false
                     }, function (entry) {
-                        entry.remove(function(){
+                        entry.remove(function () {
                             myApp.swipeoutDelete(li);
-                        }, fail);
-                    }, fail);
+                        }, fileFailHandler);
+                    }, fileFailHandler);
                 }
             });
         }
 
+    });
+
+    //open file
+    listBlock.on('click', 'div.item-content[data-url]', function (e) {
+        var imgRegex = /(.jpg|.jpeg|.png|.bmp|.gif|.webp)$/i,
+            txtRegex = /(.txt|.log)$/i;
+
+        var fileUri = this.getAttribute('data-url');
+        if (imgRegex.test(fileUri)) { //image file
+            var arr = [],
+                i = 0,
+                activeIdx = 0;
+            $$.each(listBlock.find('div.item-content[data-url]'), function (idx, node) {
+                var path = node.getAttribute('data-url');
+                if (imgRegex.test(path)) {
+                    arr.push(path);
+                    if (fileUri == path) {
+                        activeIdx = i;
+                    }
+                    i++;
+                }
+            });
+            var photoBrowser = myApp.photoBrowser({
+                photos: arr,
+                initialSlide: activeIdx,
+                type: 'page',
+                theme: 'dark'
+            });
+            //Open photo browser on click
+            photoBrowser.open();
+        } else if (txtRegex.test(fileUri)) { //txt file
+            mainView.router.loadPage('texteditor.html?uri=' + encodeURIComponent(fileUri));
+        }
+    });
+});
+
+
+myApp.onPageInit('texteditor', function (page) {
+    var ct = $$(page.container),
+        query = page.query,
+        fileUri = query.uri,
+        textarea = ct.find('textarea'),
+        btnSave = ct.find('.btn-save');
+
+    //read file as text
+    if (fileUri && fileUri.substr(0, 7).toLowerCase() == 'file://') {
+        document.addEventListener('deviceready', function () {
+            window.resolveLocalFileSystemURL(fileUri, function (fileEntry) {
+                fileEntry.file(function (file) {
+                    var reader = new FileReader();
+
+                    reader.onloadend = function (e) {
+                        textarea.val(e.target.result);
+                    };
+
+                    reader.readAsText(file);
+                }, fileFailHandler);
+            }, fileFailHandler);
+        }, false);
+    }
+
+    btnSave.on('click', function (e) {
+        window.resolveLocalFileSystemURL(fileUri, function (fileEntry) {
+            fileEntry.createWriter(function (writer) {
+                writer.seek(0);
+
+                var blob = new Blob([textarea.val()], {
+                    type: 'text/plain'
+                });
+                writer.write(blob);
+
+                myApp.addNotification({
+                    message: "Successfully saved"
+                });
+
+            }, fileFailHandler);
+        }, fileFailHandler);
+    });
+});
+
+
+
+
+myApp.onPageInit('filetransfer', function (page) {
+    var ct = $$(page.container),
+        imgCt = ct.find('.img-ct'),
+        upPb = ct.find('p.upload-progress'),
+        upDesc = ct.find('p.upload-description');
+
+    var uploadUrl = 'https://www.script-tutorials.com/demos/199/upload.php';
+
+    var uploadSuccess = function (result) {
+        upDesc.html('upload completed');
+        myApp.hideProgressbar(upPb);
+    };
+    var uploadFailed = function (error) {
+        upDesc.html(error.message || error);
+        myApp.hideProgressbar(upPb);
+    };
+    var uploadProcessing = function (result) {
+        if (result.lengthComputable) {
+            var percent = (result.loaded / result.total * 100).toFixed(2);
+
+            upDesc.html('uploading ' + percent + '%');
+            myApp.showProgressbar(upPb, percent);
+        }
+    };
+
+    //cordova filetransfer upload
+    var startCordovaUpload = function (uri) {
+        var now = new Date().getTime();
+        var options = new FileUploadOptions();
+        options.fileKey = "image_file";
+        options.fileName = uri.substr(uri.lastIndexOf('/') + 1) || (now + '.jpg');
+        options.mimeType = "multipart/form-data";
+
+        var ft = new FileTransfer();
+        ft.onprogress = uploadProcessing;
+        ft.upload(uri, uploadUrl, uploadSuccess, uploadFailed, options);
+
+        upDesc.html('uploading 0%');
+        myApp.showProgressbar(upPb, 0);
+    };
+
+    //html5 upload
+    var startHtml5Upload = function (file) {
+        var form = new FormData();
+        /*form.append('name', file.name);
+        form.append('file', file);*/
+        form.append('image_file', file);
+
+        var xhr = new XMLHttpRequest();
+        xhr.open("post", uploadUrl, true);
+
+        xhr.upload.addEventListener("progress", uploadProcessing, false);
+        xhr.addEventListener("readystatechange", function () {
+            var result = xhr;
+            if (result.status != 200) { //error
+                console.log('onreadystatechange', result, result.readyState, result.status, result.response, result.statusText);
+
+                var msg = '';
+                if (result.response) {
+                    try {
+                        var err = eval('(' + result.response + ')');
+                        msg = err.message;
+                    } catch (e) {
+                        msg = result.response;
+                    }
+                } else {
+                    msg = result.statusText;
+                }
+                uploadFailed(msg || 'Unknown Error');
+            } else if (result.readyState == 4) { //finished
+                uploadSuccess(result)
+            }
+        });
+        xhr.send(form);
+
+        upDesc.html('uploading 0%');
+        myApp.showProgressbar(upPb, 0);
+    };
+
+    //read file from input 
+    var inputFileChosen = function (file) {
+        var height = imgCt.height();
+
+        var reader = new FileReader();
+        reader.onload = function (e) {
+            var image = new Image();
+            image.onload = function () {
+                var canvas = document.createElement("canvas");
+                if (image.height > height) {
+                    image.width *= height / image.height;
+                    image.height = height;
+                }
+                var ctx = canvas.getContext("2d");
+                ctx.clearRect(0, 0, canvas.width, canvas.height);
+                canvas.width = image.width;
+                canvas.height = image.height;
+                ctx.drawImage(image, 0, 0, image.width, image.height);
+                imgCt.addClass('has-img').css('background-image', 'url(' + canvas.toDataURL('image/jpeg', 0.7) + ')');
+
+                //start upload
+                startHtml5Upload(file);
+            };
+            image.src = e.target.result;
+        };
+        reader.readAsDataURL(file);
+    };
+
+    var getPicSucceed = function (uri) {
+        if (!uri) return;
+
+        var idx = uri.lastIndexOf("?");
+        if (idx >= 0)
+            uri = uri.substring(0, idx);
+        imgCt.addClass('has-img').css('background-image', 'url(' + uri + ')');
+
+        //start upload
+        startCordovaUpload(uri);
+    };
+
+    var getPicture = function (sourceType) { //选择图片
+        if (isCordova) {
+            var isCamera = sourceType == 1;
+            navigator.camera.getPicture(getPicSucceed, function (err) {
+                console.log('getPicture Error: ', err);
+            }, {
+                quality: isCamera ? 50 : 100,
+                targetWidth: 800,
+                targetHeight: 800,
+                destinationType: navigator.camera.DestinationType.FILE_URI,
+                sourceType: navigator.camera.PictureSourceType[isCamera ? 'CAMERA' : 'PHOTOLIBRARY'],
+                correctOrientation: true,
+                saveToPhotoAlbum: isCamera
+            });
+        }
+    }
+
+    if (isCordova) {
+        ct.find('.img-ct').on('click', function () {
+            var buttons1 = [{
+                text: 'Take a photo',
+                onClick: function () {
+                    getPicture(1);
+                }
+            }, {
+                text: 'Choose from Library',
+                onClick: function () {
+                    getPicture(0);
+                }
+            }];
+            var buttons2 = [{
+                text: 'Cancel',
+                color: 'red'
+            }];
+            var groups = [buttons1, buttons2];
+            myApp.actions(groups);
+        });
+    } else {
+        var input = $$('<input type="file" accept=".jpg,.jpeg,.png,.bmp,.gif">');
+        imgCt.append(input);
+        input.on('change', function (e) {
+            var files = e.target.files;
+            if (files.length) {
+                inputFileChosen(files[0]);
+            }
+        });
+    }
+
+
+    var swiperCt = ct.find('.swiper-container'),
+        btnDownload = ct.find('.btn-download'),
+        downPb = ct.find('p.download-progress'),
+        downDesc = ct.find('p.download-description');
+    $$.ajax({
+        url: 'http://www.bing.com/HPImageArchive.aspx?format=js&idx=0&n=5',
+        dataType: 'json',
+        success: function (data, status, xhr) {
+            if (data.images && data.images.length) {
+                var wrapper = ct.find('.swiper-wrapper');
+                $$.each(data.images, function (i, imgData) {
+                    var smallUrl = 'http://www.bing.com' + imgData.urlbase + '_640x480.jpg',
+                        hdUrl = 'http://www.bing.com' + imgData.urlbase + '_1920x1080.jpg';
+                    wrapper.append($$('<div class="swiper-slide">\
+                            <img data-src="' + smallUrl + '" data-hdsrc="' + hdUrl + '" class="swiper-lazy">\
+                            <div class="desc">' + imgData.copyright + '</div>\
+                            <div class="preloader"></div>\
+                        </div>'));
+                });
+                new Swiper(swiperCt[0], {
+                    preloadImages: false,
+                    lazyLoading: true,
+                    pagination: ct.find('.swiper-pagination')[0]
+                });
+            }
+        },
+        error: function (err) {
+            console.log(err)
+        }
+    });
+
+    btnDownload.on('click', function () {
+        if (!isCordova) return;
+
+        var mySwiper = swiperCt[0].swiper;
+        if (mySwiper) {
+            var currentSlide = mySwiper.slides[mySwiper.activeIndex],
+                src = $$(currentSlide).find('img').attr('data-hdsrc');
+
+            if (src) {
+                var name = src.substr(src.lastIndexOf('/') + 1);
+
+                window.requestFileSystem(
+                    LocalFileSystem.PERSISTENT,
+                    0,
+                    function (fs) {
+                        var savePath = encodeURI(fs.root.toURL() + name);
+
+                        var ft = new FileTransfer();
+                        ft.onprogress = function (result) {
+                            if (result.lengthComputable) {
+                                var percent = (result.loaded / result.total * 100).toFixed(2);
+
+                                downDesc.html('downloading ' + percent + '%');
+                                myApp.showProgressbar(downPb, percent);
+                            }
+                        };
+                        ft.download(src, savePath, function (entry) {
+                            console.log(entry);
+
+                            downDesc.html('download completed');
+                            myApp.hideProgressbar(downPb);
+                        }, function (error) {
+                            console.log(error);
+
+                            downDesc.html('download failed');
+                            myApp.hideProgressbar(downPb);
+                        });
+                    },
+                    function (error) {
+                        console.log(error);
+
+                        downDesc.html(error.message || error.toString());
+                    }
+                );
+            }
+        }
     });
 });

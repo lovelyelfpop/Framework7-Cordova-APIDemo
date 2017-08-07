@@ -7,6 +7,8 @@
 		"Framework7": true,
 		"Dom7": true,
 		"device": true,
+		"FileUploadOptions": true,
+		"FileTransfer": true,
 		"ContactFindOptions": true,
 		"ContactField": true,
 		"StatusBar": true,
@@ -14,7 +16,8 @@
 		"Media": true,
 		"Connection": true,
 		"LocalFileSystem": true,
-		"Template7": true
+		"Template7": true,
+		"Swiper": true
 	},
 	"parserOptions": {
 		"sourceType": "module"
