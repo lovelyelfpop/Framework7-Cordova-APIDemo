@@ -215,8 +215,8 @@ td {
 }
 
 .compass-ct {
-  max-width: 85vmin;
-  max-height: 85vmin;
+  max-width: 80vmin;
+  max-height: 80vmin;
   position: relative;
   margin: 0 auto;
   overflow: hidden;

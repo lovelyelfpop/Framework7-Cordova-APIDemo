@@ -1268,7 +1268,8 @@ myApp.onPageInit('fileexplorer', function (page) {
             arr.sort(function (a, b) {
                 var f1 = b.isDirectory - a.isDirectory;
                 if (f1 == 0) {
-                    return a.name.localeCompare(b.name);
+                    //return a.name.localeCompare(b.name);
+                    return a.name > b.name ? 1 : -1;
                 }
                 return f1;
             });
